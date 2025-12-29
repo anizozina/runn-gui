@@ -86,6 +86,19 @@ export const ja: Translation = {
     noStepSelectedDesc: 'ステップを選択して編集するか、新しいステップを追加してください',
   },
 
+  // Include Step
+  includeStep: {
+    title: 'Includeステップ（外部参照）',
+    description: '説明:',
+    path: 'Includeパス:',
+    pathHint: '外部ステップファイルへのパス（例: steps/post-fleet.yml）',
+    vars: 'Includeステップに渡す変数:',
+    varsHint: 'これらの変数は外部ステップファイルに渡されます',
+    info: 'Includeステップについて',
+    infoDesc: 'Includeステップは外部YAMLファイルを参照します。これは読み取り専用ビューです。編集するには、YAMLファイルを直接編集してください。',
+    close: '閉じる',
+  },
+
   // HTTP Request Editor
   httpRequest: {
     description: '説明 (任意):',

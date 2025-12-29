@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRunbookStore } from '../store/runbookStore';
 import type { Step } from '../types/runbook';
 import { HttpRequestEditor } from './HttpRequestEditor';
+import { IncludeStepViewer } from './IncludeStepViewer';
 import { useTranslation } from '../i18n/I18nContext';
 
 export function StepsEditor() {
@@ -38,6 +39,12 @@ export function StepsEditor() {
 
   const getStepLabel = (step: Step, index: number): string => {
     if (step.desc) return step.desc;
+    if (step.include) {
+      const includePath = typeof step.include === 'string'
+        ? step.include
+        : step.include.path;
+      return `📁 Include: ${includePath}`;
+    }
     if (step.req) return `HTTP ${step.req.method} ${step.req.path}`;
     if (step.db) return `DB Query`;
     if (step.grpcRequest) return `gRPC ${step.grpcRequest.method}`;
@@ -126,11 +133,20 @@ export function StepsEditor() {
           </div>
         ) : selectedStep ? (
           <div>
-            <h2>{t.steps.editStep}</h2>
-            <HttpRequestEditor
-              step={selectedStep}
-              onCancel={() => setSelectedStepId(null)}
-            />
+            {selectedStep.include ? (
+              <IncludeStepViewer
+                step={selectedStep}
+                onClose={() => setSelectedStepId(null)}
+              />
+            ) : (
+              <>
+                <h2>{t.steps.editStep}</h2>
+                <HttpRequestEditor
+                  step={selectedStep}
+                  onCancel={() => setSelectedStepId(null)}
+                />
+              </>
+            )}
           </div>
         ) : (
           <div className="empty-state">

@@ -84,6 +84,19 @@ const en = {
     noStepSelectedDesc: 'Select a step to edit or add a new one',
   },
 
+  // Include Step
+  includeStep: {
+    title: 'Include Step (External Reference)',
+    description: 'Description:',
+    path: 'Include Path:',
+    pathHint: 'Path to external step file (e.g., steps/post-fleet.yml)',
+    vars: 'Variables passed to included step:',
+    varsHint: 'These variables are passed to the included step file',
+    info: 'About Include Steps',
+    infoDesc: 'Include steps reference external YAML files. This is a read-only view. To edit, modify the YAML file directly.',
+    close: 'Close',
+  },
+
   // HTTP Request Editor
   httpRequest: {
     description: 'Description (optional):',

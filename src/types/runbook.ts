@@ -98,6 +98,11 @@ export interface TestCondition {
   desc?: string;
 }
 
+export interface IncludeStep {
+  path: string;
+  vars?: Record<string, any>;
+}
+
 export interface Step {
   id: string;
   desc?: string;
@@ -113,7 +118,7 @@ export interface Step {
   ssh?: SshCommand;
   exec?: SshCommand;
   test?: TestCondition[];
-  include?: string;
+  include?: IncludeStep | string; // Can be object or string path
   bind?: {
     steps?: Record<string, any>;
     vars?: Record<string, any>;
@@ -127,6 +132,7 @@ export interface Runbook {
   runners: Record<string, Runner>;
   vars?: Record<string, any>;
   steps: Step[];
+  finally?: Step[]; // Cleanup steps
   debug?: boolean;
   skipTest?: boolean;
   skipIncluded?: boolean;
