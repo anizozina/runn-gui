@@ -145,12 +145,16 @@ export const ja: Translation = {
     generate: 'YAML生成',
     exportToFile: 'ファイルにエクスポート',
     copyToClipboard: 'クリップボードにコピー',
+    importFromFile: 'YAMLインポート',
     validationErrors: 'バリデーションエラー:',
     generatedYaml: '生成されたYAML:',
     placeholder: '"YAML生成"をクリックして出力を確認...',
     exportSuccess: 'ランブックのエクスポートに成功しました！',
     copySuccess: 'YAMLをクリップボードにコピーしました！',
     exportError: 'エクスポートに失敗:',
+    importSuccess: 'YAMLのインポートに成功しました！',
+    importError: 'インポートに失敗:',
+    importConfirm: 'YAMLをインポートすると現在のランブックが置き換えられます。続行しますか？',
   },
 
   // Common

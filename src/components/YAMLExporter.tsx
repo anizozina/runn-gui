@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useRunbookStore } from '../store/runbookStore';
-import { runbookToYAML, validateRunbook } from '../utils/yaml';
-import { save } from '@tauri-apps/plugin-dialog';
-import { writeTextFile } from '@tauri-apps/plugin-fs';
+import { runbookToYAML, validateRunbook, yamlToRunbook } from '../utils/yaml';
+import { save, open } from '@tauri-apps/plugin-dialog';
+import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
 import { useTranslation } from '../i18n/I18nContext';
 
 export function YAMLExporter() {
   const runbook = useRunbookStore((state) => state.runbook);
+  const importRunbook = useRunbookStore((state) => state.importRunbook);
   const { t } = useTranslation();
   const [yamlContent, setYamlContent] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
@@ -59,6 +60,44 @@ export function YAMLExporter() {
     }
   };
 
+  const handleImport = async () => {
+    try {
+      // Confirm before importing
+      if (!confirm(t.yaml.importConfirm)) {
+        return;
+      }
+
+      // Open file dialog
+      const filePath = await open({
+        filters: [{
+          name: 'YAML',
+          extensions: ['yml', 'yaml']
+        }],
+        multiple: false
+      });
+
+      if (!filePath) {
+        return; // User cancelled
+      }
+
+      // Read file content
+      const yamlText = await readTextFile(filePath as string);
+
+      // Parse YAML to Runbook
+      const importedRunbook = yamlToRunbook(yamlText);
+
+      // Import to store
+      importRunbook(importedRunbook);
+
+      // Regenerate YAML preview
+      generateYAML();
+
+      alert(t.yaml.importSuccess);
+    } catch (error) {
+      alert(`${t.yaml.importError} ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   // Auto-generate on mount and when runbook changes
   useState(() => {
     generateYAML();
@@ -66,7 +105,7 @@ export function YAMLExporter() {
 
   return (
     <div>
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button className="btn btn-primary" onClick={generateYAML}>
           {t.yaml.generate}
         </button>
@@ -76,6 +115,11 @@ export function YAMLExporter() {
         <button className="btn btn-secondary" onClick={copyToClipboard} disabled={!yamlContent}>
           {t.yaml.copyToClipboard}
         </button>
+        <div style={{ marginLeft: 'auto' }}>
+          <button className="btn btn-primary" onClick={handleImport}>
+            {t.yaml.importFromFile}
+          </button>
+        </div>
       </div>
 
       {errors.length > 0 && (

@@ -143,12 +143,16 @@ const en = {
     generate: 'Generate YAML',
     exportToFile: 'Export to File',
     copyToClipboard: 'Copy to Clipboard',
+    importFromFile: 'Import YAML',
     validationErrors: 'Validation Errors:',
     generatedYaml: 'Generated YAML:',
     placeholder: 'Click "Generate YAML" to see the output...',
     exportSuccess: 'Runbook exported successfully!',
     copySuccess: 'YAML copied to clipboard!',
     exportError: 'Failed to export:',
+    importSuccess: 'YAML imported successfully!',
+    importError: 'Failed to import:',
+    importConfirm: 'Importing YAML will replace the current runbook. Continue?',
   },
 
   // Common
