@@ -3,6 +3,7 @@ import { useRunbookStore } from '../store/runbookStore';
 import type { Step } from '../types/runbook';
 import { HttpRequestEditor } from './HttpRequestEditor';
 import { IncludeStepViewer } from './IncludeStepViewer';
+import { BindStepViewer } from './BindStepViewer';
 import { useTranslation } from '../i18n/I18nContext';
 
 export function StepsEditor() {
@@ -45,9 +46,23 @@ export function StepsEditor() {
         : step.include.path;
       return `📁 Include: ${includePath}`;
     }
-    if (step.req) return `HTTP ${step.req.method} ${step.req.path}`;
+    if (step.req) {
+      // Handle special runn req notation: { "/path": { "get": {...} } }
+      if (typeof step.req === 'object' && !step.req.method) {
+        const pathKey = Object.keys(step.req)[0];
+        if (pathKey) {
+          const methodObj = (step.req as any)[pathKey];
+          const method = Object.keys(methodObj)[0]?.toUpperCase() || 'HTTP';
+          return `HTTP ${method} ${pathKey}`;
+        }
+      }
+      return `HTTP ${step.req.method} ${step.req.path}`;
+    }
     if (step.db) return `DB Query`;
     if (step.grpcRequest) return `gRPC ${step.grpcRequest.method}`;
+    if (step.bind && Object.keys(step.bind).length > 0) {
+      return `🔗 Bind: ${Object.keys(step.bind).join(', ')}`;
+    }
     return `Step ${index + 1}`;
   };
 
@@ -135,6 +150,11 @@ export function StepsEditor() {
           <div>
             {selectedStep.include ? (
               <IncludeStepViewer
+                step={selectedStep}
+                onClose={() => setSelectedStepId(null)}
+              />
+            ) : !selectedStep.req && selectedStep.bind && Object.keys(selectedStep.bind).length > 0 ? (
+              <BindStepViewer
                 step={selectedStep}
                 onClose={() => setSelectedStepId(null)}
               />

@@ -97,6 +97,17 @@ const en = {
     close: 'Close',
   },
 
+  // Bind Step
+  bindStep: {
+    title: 'Bind Step (Variable Binding)',
+    description: 'Description:',
+    bindings: 'Variable Bindings:',
+    hint: 'These bindings extract values from responses or generate values (e.g., faker.UUID())',
+    info: 'About Bind Steps',
+    infoDesc: 'Bind steps are used to extract or generate values. Common uses: faker.UUID() for unique IDs, current.res.body.id for response values. This is a read-only view.',
+    close: 'Close',
+  },
+
   // HTTP Request Editor
   httpRequest: {
     description: 'Description (optional):',

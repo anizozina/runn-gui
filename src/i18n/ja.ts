@@ -99,6 +99,17 @@ export const ja: Translation = {
     close: '閉じる',
   },
 
+  // Bind Step
+  bindStep: {
+    title: 'Bindステップ（変数バインディング）',
+    description: '説明:',
+    bindings: '変数バインディング:',
+    hint: 'これらのバインディングはレスポンスから値を抽出したり、値を生成します（例: faker.UUID()）',
+    info: 'Bindステップについて',
+    infoDesc: 'Bindステップは値の抽出や生成に使用されます。よくある使い方: faker.UUID()でユニークIDを生成、current.res.body.idでレスポンスの値を取得。これは読み取り専用ビューです。',
+    close: '閉じる',
+  },
+
   // HTTP Request Editor
   httpRequest: {
     description: '説明 (任意):',
