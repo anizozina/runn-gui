@@ -84,6 +84,8 @@ export const ja: Translation = {
     editStep: 'ステップを編集',
     noStepSelected: 'ステップが選択されていません',
     noStepSelectedDesc: 'ステップを選択して編集するか、新しいステップを追加してください',
+    finallyTitle: 'Finally（クリーンアップ）',
+    finallyDesc: '最後に実行されるクリーンアップステップ',
   },
 
   // Include Step

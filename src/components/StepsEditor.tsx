@@ -66,7 +66,8 @@ export function StepsEditor() {
     return `Step ${index + 1}`;
   };
 
-  const selectedStep = runbook.steps.find(s => s.id === selectedStepId);
+  const selectedStep = runbook.steps.find(s => s.id === selectedStepId)
+    || runbook.finally?.find(s => s.id === selectedStepId);
 
   return (
     <div style={{ display: 'flex', gap: '1rem', height: '100%' }}>
@@ -134,6 +135,39 @@ export function StepsEditor() {
             ))
           )}
         </div>
+
+        {/* Finally Steps */}
+        {runbook.finally && runbook.finally.length > 0 && (
+          <>
+            <div style={{ marginTop: '1.5rem', marginBottom: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
+              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', color: '#ffa500' }}>
+                {t.steps.finallyTitle}
+              </h3>
+              <small style={{ color: '#aaa', fontSize: '0.8rem' }}>
+                {t.steps.finallyDesc}
+              </small>
+            </div>
+            <div className="step-list">
+              {runbook.finally.map((step, index) => (
+                <div
+                  key={step.id}
+                  className={`step-item ${selectedStepId === step.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setSelectedStepId(step.id);
+                    setShowAddForm(false);
+                  }}
+                  style={{ borderLeft: '3px solid #ffa500' }}
+                >
+                  <div className="step-header">
+                    <span className="step-title">
+                      🧹 {getStepLabel(step, index)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Step Editor */}

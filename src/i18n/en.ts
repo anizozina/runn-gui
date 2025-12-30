@@ -82,6 +82,8 @@ const en = {
     editStep: 'Edit Step',
     noStepSelected: 'No Step Selected',
     noStepSelectedDesc: 'Select a step to edit or add a new one',
+    finallyTitle: 'Finally (Cleanup)',
+    finallyDesc: 'Cleanup steps that run at the end',
   },
 
   // Include Step
