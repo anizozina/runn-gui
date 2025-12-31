@@ -1,4 +1,5 @@
 import yaml from 'js-yaml';
+import { v4 as uuidv4 } from 'uuid';
 import type { Runbook } from '../types/runbook';
 
 /**
@@ -9,6 +10,7 @@ export function runbookToYAML(runbook: Runbook): string {
   const cleanedRunbook = {
     ...runbook,
     steps: runbook.steps.map(({ id, ...step }) => step),
+    finally: runbook.finally?.map(({ id, ...step }) => step),
   };
 
   // Remove empty fields
@@ -37,6 +39,20 @@ export function yamlToRunbook(yamlString: string): Runbook {
     // Ensure runners exists
     if (!parsed.runners) {
       parsed.runners = {};
+    }
+
+    // Add IDs to steps if missing
+    parsed.steps = parsed.steps.map(step => ({
+      ...step,
+      id: step.id || uuidv4(),
+    }));
+
+    // Add IDs to finally steps if they exist
+    if (parsed.finally && Array.isArray(parsed.finally)) {
+      parsed.finally = parsed.finally.map(step => ({
+        ...step,
+        id: step.id || uuidv4(),
+      }));
     }
 
     return parsed;
@@ -112,9 +128,9 @@ export function validateRunbook(runbook: Runbook): { valid: boolean; errors: str
 
   // Validate each step has at least one action
   runbook.steps?.forEach((step, index) => {
-    const hasAction = step.req || step.grpcRequest || step.db || step.cdp || step.ssh || step.exec || step.include;
+    const hasAction = step.req || step.grpcRequest || step.db || step.cdp || step.ssh || step.exec || step.include || step.bind;
     if (!hasAction) {
-      errors.push(`Step ${index + 1} must have at least one action (req, db, etc.)`);
+      errors.push(`Step ${index + 1} must have at least one action (req, db, bind, include, etc.)`);
     }
   });
 
