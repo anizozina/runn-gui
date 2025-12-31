@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRunbookStore } from '../store/runbookStore';
-import type { Step, HttpRequest, HttpMethod, TestCondition } from '../types/runbook';
+import type { Step, HttpMethod, TestCondition } from '../types/runbook';
 import { useTranslation } from '../i18n/I18nContext';
 
 interface HttpRequestEditorProps {
@@ -9,23 +9,72 @@ interface HttpRequestEditorProps {
   onCancel: () => void;
 }
 
+// Helper function to extract request data from both formats
+function extractRequestData(req: any) {
+  // Standard format: { method: "GET", path: "/path", ... }
+  if (req?.method && req?.path) {
+    return {
+      method: req.method as HttpMethod,
+      path: req.path,
+      headers: req.headers || {},
+      body: req.body,
+      query: req.query,
+      isRunnFormat: false
+    };
+  }
+
+  // Runn format: { "/path": { "get": { headers: {...}, ... } } }
+  if (req && typeof req === 'object' && !req.method && !req.path) {
+    const pathKey = Object.keys(req)[0];
+    if (pathKey) {
+      const methodObj = req[pathKey];
+      const methodKey = Object.keys(methodObj)[0];
+      const config = methodObj[methodKey] || {};
+
+      return {
+        method: methodKey.toUpperCase() as HttpMethod,
+        path: pathKey,
+        headers: config.headers || {},
+        body: config.body,
+        query: config.query,
+        isRunnFormat: true
+      };
+    }
+  }
+
+  // Default
+  return {
+    method: 'GET' as HttpMethod,
+    path: '',
+    headers: {},
+    body: undefined,
+    query: undefined,
+    isRunnFormat: false
+  };
+}
+
 export function HttpRequestEditor({ step, onSave, onCancel }: HttpRequestEditorProps) {
   const updateStep = useRunbookStore((state) => state.updateStep);
   const { t } = useTranslation();
 
+  // Extract request data (supports both standard and runn formats)
+  const requestData = step?.req ? extractRequestData(step.req) : extractRequestData(null);
+
   // Form state
   const [desc, setDesc] = useState(step?.desc || '');
-  const [method, setMethod] = useState<HttpMethod>(step?.req?.method || 'GET');
-  const [path, setPath] = useState(step?.req?.path || '');
-  const [headers, setHeaders] = useState<Record<string, string>>(step?.req?.headers || {});
+  const [method, setMethod] = useState<HttpMethod>(requestData.method);
+  const [path, setPath] = useState(requestData.path);
+  const [headers, setHeaders] = useState<Record<string, string>>(requestData.headers);
+  const [query] = useState<Record<string, any>>(requestData.query || {});
+  const [useRunnFormat] = useState(requestData.isRunnFormat);
 
   // Body type state
   const [bodyType, setBodyType] = useState<'none' | 'json' | 'form-data' | 'raw'>('json');
   const [body, setBody] = useState(
-    step?.req?.body
-      ? typeof step.req.body === 'string'
-        ? step.req.body
-        : JSON.stringify(step.req.body, null, 2)
+    requestData.body
+      ? typeof requestData.body === 'string'
+        ? requestData.body
+        : JSON.stringify(requestData.body, null, 2)
       : ''
   );
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -116,12 +165,31 @@ export function HttpRequestEditor({ step, onSave, onCancel }: HttpRequestEditorP
       }
     }
 
-    const req: HttpRequest = {
-      method,
-      path,
-      headers: Object.keys(finalHeaders).length > 0 ? finalHeaders : undefined,
-      body: parsedBody
-    };
+    // Build req object in the appropriate format
+    let req: any;
+
+    if (useRunnFormat) {
+      // Runn format: { "/path": { "method": {...} } }
+      const config: any = {};
+      if (Object.keys(finalHeaders).length > 0) config.headers = finalHeaders;
+      if (parsedBody !== undefined) config.body = parsedBody;
+      if (Object.keys(query).length > 0) config.query = query;
+
+      req = {
+        [path]: {
+          [method.toLowerCase()]: config
+        }
+      };
+    } else {
+      // Standard format: { method: "GET", path: "/path", ... }
+      req = {
+        method,
+        path,
+        headers: Object.keys(finalHeaders).length > 0 ? finalHeaders : undefined,
+        body: parsedBody,
+        query: Object.keys(query).length > 0 ? query : undefined
+      };
+    }
 
     const stepData: Omit<Step, 'id'> = {
       desc: desc.trim() || undefined,

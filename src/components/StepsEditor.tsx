@@ -20,7 +20,6 @@ import type { Step } from '../types/runbook';
 import { HttpRequestEditor } from './HttpRequestEditor';
 import { IncludeStepViewer } from './IncludeStepViewer';
 import { BindStepViewer } from './BindStepViewer';
-import { RunnRequestViewer } from './RunnRequestViewer';
 import { useTranslation } from '../i18n/I18nContext';
 
 export function StepsEditor() {
@@ -123,14 +122,6 @@ export function StepsEditor() {
 
   const selectedStep = runbook.steps.find(s => s.id === selectedStepId)
     || runbook.finally?.find(s => s.id === selectedStepId);
-
-  // Helper function to detect runn format req
-  const isRunnFormatReq = (step: Step): boolean => {
-    if (!step.req) return false;
-    // runn format: { "/path": { "method": {...} } }
-    // Standard format has method and path properties
-    return typeof step.req === 'object' && !('method' in step.req) && !('path' in step.req);
-  };
 
   // Sortable Step Item Component
   interface SortableStepItemProps {
@@ -427,11 +418,6 @@ export function StepsEditor() {
               />
             ) : !selectedStep.req && selectedStep.bind && Object.keys(selectedStep.bind).length > 0 ? (
               <BindStepViewer
-                step={selectedStep}
-                onClose={() => setSelectedStepId(null)}
-              />
-            ) : selectedStep.req && isRunnFormatReq(selectedStep) ? (
-              <RunnRequestViewer
                 step={selectedStep}
                 onClose={() => setSelectedStepId(null)}
               />
