@@ -79,7 +79,20 @@ export function HttpRequestEditor({ step, onSave, onCancel }: HttpRequestEditorP
   );
   const [formData, setFormData] = useState<Record<string, string>>({});
 
-  const [tests, setTests] = useState<TestCondition[]>(step?.test || []);
+  // Handle test field (can be string or array)
+  const [testFormat] = useState<'string' | 'array'>(() => {
+    if (!step?.test) return 'array';
+    return typeof step.test === 'string' ? 'string' : 'array';
+  });
+  const [tests, setTests] = useState<TestCondition[]>(() => {
+    if (!step?.test) return [];
+    // If test is a string, convert to array with single item
+    if (typeof step.test === 'string') {
+      return [{ condition: step.test }];
+    }
+    // If test is already an array
+    return step.test;
+  });
   const [bind, setBind] = useState<Record<string, string>>(
     step?.bind?.vars || step?.bind?.steps || {}
   );
@@ -191,10 +204,22 @@ export function HttpRequestEditor({ step, onSave, onCancel }: HttpRequestEditorP
       };
     }
 
+    // Build test field in appropriate format
+    let testData: any = undefined;
+    if (tests.length > 0) {
+      // If original format was string and we have single test without description, save as string
+      if (testFormat === 'string' && tests.length === 1 && !tests[0].desc) {
+        testData = tests[0].condition;
+      } else {
+        // Otherwise save as array
+        testData = tests;
+      }
+    }
+
     const stepData: Omit<Step, 'id'> = {
       desc: desc.trim() || undefined,
       req,
-      test: tests.length > 0 ? tests : undefined,
+      test: testData,
       bind: Object.keys(bind).length > 0 ? { vars: bind } : undefined
     };
 

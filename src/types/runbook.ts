@@ -111,13 +111,13 @@ export interface Step {
     count?: number | string;
     until?: string;
   };
-  req?: HttpRequest;
+  req?: HttpRequest | Record<string, any>; // Can be standard format or runn format { "/path": { "method": {...} } }
   grpcRequest?: GrpcRequest;
   db?: DbQuery;
   cdp?: CdpAction;
   ssh?: SshCommand;
   exec?: SshCommand;
-  test?: TestCondition[];
+  test?: TestCondition[] | string; // Can be array of conditions or single string condition
   include?: IncludeStep | string; // Can be object or string path
   bind?: {
     steps?: Record<string, any>;
