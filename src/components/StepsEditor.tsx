@@ -148,26 +148,6 @@ export function StepsEditor() {
                             {displayInfo.icon}
                           </span>
                         )}
-                        {displayInfo.method && (
-                          <span
-                            className="method-chip"
-                            style={{
-                              padding: '0.1rem 0.4rem',
-                              borderRadius: '3px',
-                              fontSize: '0.7rem',
-                              fontWeight: 'bold',
-                              backgroundColor: displayInfo.method === 'GET' ? '#28a745' :
-                                               displayInfo.method === 'POST' ? '#007bff' :
-                                               displayInfo.method === 'PUT' ? '#ffc107' :
-                                               displayInfo.method === 'DELETE' ? '#dc3545' :
-                                               '#6c757d',
-                              color: '#fff',
-                              flexShrink: 0
-                            }}
-                          >
-                            {displayInfo.method}
-                          </span>
-                        )}
                         <span
                           style={{
                             color: '#fff',
@@ -184,15 +164,44 @@ export function StepsEditor() {
                       {displayInfo.path && (
                         <div
                           style={{
-                            color: '#aaa',
-                            fontSize: '0.75rem',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
                             marginLeft: '1.5rem'
                           }}
                         >
-                          {displayInfo.path}
+                          {displayInfo.method && (
+                            <span
+                              className="method-chip"
+                              style={{
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '3px',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                backgroundColor: displayInfo.method === 'GET' ? '#28a745' :
+                                                 displayInfo.method === 'POST' ? '#007bff' :
+                                                 displayInfo.method === 'PUT' ? '#ffc107' :
+                                                 displayInfo.method === 'DELETE' ? '#dc3545' :
+                                                 '#6c757d',
+                                color: '#fff',
+                                flexShrink: 0
+                              }}
+                            >
+                              {displayInfo.method}
+                            </span>
+                          )}
+                          <span
+                            style={{
+                              color: '#aaa',
+                              fontSize: '0.75rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              minWidth: 0
+                            }}
+                          >
+                            {displayInfo.path}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -263,26 +272,6 @@ export function StepsEditor() {
                           <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>
                             🧹
                           </span>
-                          {displayInfo.method && (
-                            <span
-                              className="method-chip"
-                              style={{
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '3px',
-                                fontSize: '0.7rem',
-                                fontWeight: 'bold',
-                                backgroundColor: displayInfo.method === 'GET' ? '#28a745' :
-                                                 displayInfo.method === 'POST' ? '#007bff' :
-                                                 displayInfo.method === 'PUT' ? '#ffc107' :
-                                                 displayInfo.method === 'DELETE' ? '#dc3545' :
-                                                 '#6c757d',
-                                color: '#fff',
-                                flexShrink: 0
-                              }}
-                            >
-                              {displayInfo.method}
-                            </span>
-                          )}
                           <span
                             style={{
                               color: '#fff',
@@ -299,15 +288,44 @@ export function StepsEditor() {
                         {displayInfo.path && (
                           <div
                             style={{
-                              color: '#aaa',
-                              fontSize: '0.75rem',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
                               marginLeft: '1.5rem'
                             }}
                           >
-                            {displayInfo.path}
+                            {displayInfo.method && (
+                              <span
+                                className="method-chip"
+                                style={{
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: '3px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 'bold',
+                                  backgroundColor: displayInfo.method === 'GET' ? '#28a745' :
+                                                   displayInfo.method === 'POST' ? '#007bff' :
+                                                   displayInfo.method === 'PUT' ? '#ffc107' :
+                                                   displayInfo.method === 'DELETE' ? '#dc3545' :
+                                                   '#6c757d',
+                                  color: '#fff',
+                                  flexShrink: 0
+                                }}
+                              >
+                                {displayInfo.method}
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                color: '#aaa',
+                                fontSize: '0.75rem',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                minWidth: 0
+                              }}
+                            >
+                              {displayInfo.path}
+                            </span>
                           </div>
                         )}
                       </div>
