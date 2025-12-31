@@ -39,32 +39,62 @@ export function StepsEditor() {
     }
   };
 
-  const getStepLabel = (step: Step, index: number): string => {
-    if (step.desc) return step.desc;
+  interface StepDisplayInfo {
+    method?: string;
+    path?: string;
+    desc?: string;
+    icon?: string;
+    label: string;
+  }
+
+  const getStepDisplayInfo = (step: Step, index: number): StepDisplayInfo => {
+    // Include step
     if (step.include) {
-      const includePath = typeof step.include === 'string'
-        ? step.include
-        : step.include.path;
-      return `📁 Include: ${includePath}`;
+      const includePath = typeof step.include === 'string' ? step.include : step.include.path;
+      return {
+        icon: '📁',
+        label: step.desc || 'Include',
+        path: includePath
+      };
     }
-    if (step.req) {
-      // Handle special runn req notation: { "/path": { "get": {...} } }
-      if (typeof step.req === 'object' && !step.req.method) {
-        const pathKey = Object.keys(step.req)[0];
-        if (pathKey) {
-          const methodObj = (step.req as any)[pathKey];
-          const method = Object.keys(methodObj)[0]?.toUpperCase() || 'HTTP';
-          return `HTTP ${method} ${pathKey}`;
-        }
+
+    // HTTP request (runn format)
+    if (step.req && typeof step.req === 'object' && !('method' in step.req)) {
+      const pathKey = Object.keys(step.req)[0];
+      if (pathKey) {
+        const methodObj = (step.req as any)[pathKey];
+        const method = Object.keys(methodObj)[0]?.toUpperCase() || 'GET';
+        return {
+          method,
+          path: pathKey,
+          label: step.desc || 'HTTP Request'
+        };
       }
-      return `HTTP ${step.req.method} ${step.req.path}`;
     }
-    if (step.db) return `DB Query`;
-    if (step.grpcRequest) return `gRPC ${step.grpcRequest.method}`;
+
+    // HTTP request (standard format)
+    if (step.req && 'method' in step.req) {
+      return {
+        method: step.req.method,
+        path: step.req.path,
+        label: step.desc || 'HTTP Request'
+      };
+    }
+
+    // Bind-only step
     if (step.bind && Object.keys(step.bind).length > 0) {
-      return `🔗 Bind: ${Object.keys(step.bind).join(', ')}`;
+      return {
+        icon: '🔗',
+        label: step.desc || 'Bind',
+        path: Object.keys(step.bind).join(', ')
+      };
     }
-    return `Step ${index + 1}`;
+
+    // Other types
+    if (step.db) return { label: step.desc || 'DB Query' };
+    if (step.grpcRequest) return { label: step.desc || 'gRPC', path: step.grpcRequest.method };
+
+    return { label: `Step ${index + 1}` };
   };
 
   const selectedStep = runbook.steps.find(s => s.id === selectedStepId)
@@ -96,52 +126,110 @@ export function StepsEditor() {
               <p>{t.steps.noStepsDesc}</p>
             </div>
           ) : (
-            runbook.steps.map((step, index) => (
-              <div
-                key={step.id}
-                className={`step-item ${selectedStepId === step.id ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedStepId(step.id);
-                  setShowAddForm(false);
-                }}
-              >
-                <div className="step-header">
-                  <span className="step-title">
-                    {index + 1}. {getStepLabel(step, index)}
-                  </span>
-                  <div className="step-actions" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => handleMoveUp(index)}
-                      disabled={index === 0}
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => handleMoveDown(index)}
-                      disabled={index === runbook.steps.length - 1}
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => {
-                        removeStep(step.id);
-                        if (selectedStepId === step.id) {
-                          setSelectedStepId(null);
-                        }
-                      }}
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                    >
-                      ×
-                    </button>
+            runbook.steps.map((step, index) => {
+              const displayInfo = getStepDisplayInfo(step, index);
+              return (
+                <div
+                  key={step.id}
+                  className={`step-item ${selectedStepId === step.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setSelectedStepId(step.id);
+                    setShowAddForm(false);
+                  }}
+                >
+                  <div className="step-header">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <span style={{ color: '#aaa', fontSize: '0.75rem', flexShrink: 0 }}>
+                          {index + 1}.
+                        </span>
+                        {displayInfo.icon && (
+                          <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>
+                            {displayInfo.icon}
+                          </span>
+                        )}
+                        {displayInfo.method && (
+                          <span
+                            className="method-chip"
+                            style={{
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '3px',
+                              fontSize: '0.7rem',
+                              fontWeight: 'bold',
+                              backgroundColor: displayInfo.method === 'GET' ? '#28a745' :
+                                               displayInfo.method === 'POST' ? '#007bff' :
+                                               displayInfo.method === 'PUT' ? '#ffc107' :
+                                               displayInfo.method === 'DELETE' ? '#dc3545' :
+                                               '#6c757d',
+                              color: '#fff',
+                              flexShrink: 0
+                            }}
+                          >
+                            {displayInfo.method}
+                          </span>
+                        )}
+                        <span
+                          style={{
+                            color: '#fff',
+                            fontSize: '0.85rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            minWidth: 0
+                          }}
+                        >
+                          {displayInfo.label}
+                        </span>
+                      </div>
+                      {displayInfo.path && (
+                        <div
+                          style={{
+                            color: '#aaa',
+                            fontSize: '0.75rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            marginLeft: '1.5rem'
+                          }}
+                        >
+                          {displayInfo.path}
+                        </div>
+                      )}
+                    </div>
+                    <div className="step-actions" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => handleMoveUp(index)}
+                        disabled={index === 0}
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => handleMoveDown(index)}
+                        disabled={index === runbook.steps.length - 1}
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                          removeStep(step.id);
+                          if (selectedStepId === step.id) {
+                            setSelectedStepId(null);
+                          }
+                        }}
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -157,23 +245,76 @@ export function StepsEditor() {
               </small>
             </div>
             <div className="step-list">
-              {runbook.finally.map((step, index) => (
-                <div
-                  key={step.id}
-                  className={`step-item ${selectedStepId === step.id ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedStepId(step.id);
-                    setShowAddForm(false);
-                  }}
-                  style={{ borderLeft: '3px solid #ffa500' }}
-                >
-                  <div className="step-header">
-                    <span className="step-title">
-                      🧹 {getStepLabel(step, index)}
-                    </span>
+              {runbook.finally.map((step, index) => {
+                const displayInfo = getStepDisplayInfo(step, index);
+                return (
+                  <div
+                    key={step.id}
+                    className={`step-item ${selectedStepId === step.id ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedStepId(step.id);
+                      setShowAddForm(false);
+                    }}
+                    style={{ borderLeft: '3px solid #ffa500' }}
+                  >
+                    <div className="step-header">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                          <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>
+                            🧹
+                          </span>
+                          {displayInfo.method && (
+                            <span
+                              className="method-chip"
+                              style={{
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '3px',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                backgroundColor: displayInfo.method === 'GET' ? '#28a745' :
+                                                 displayInfo.method === 'POST' ? '#007bff' :
+                                                 displayInfo.method === 'PUT' ? '#ffc107' :
+                                                 displayInfo.method === 'DELETE' ? '#dc3545' :
+                                                 '#6c757d',
+                                color: '#fff',
+                                flexShrink: 0
+                              }}
+                            >
+                              {displayInfo.method}
+                            </span>
+                          )}
+                          <span
+                            style={{
+                              color: '#fff',
+                              fontSize: '0.85rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              minWidth: 0
+                            }}
+                          >
+                            {displayInfo.label}
+                          </span>
+                        </div>
+                        {displayInfo.path && (
+                          <div
+                            style={{
+                              color: '#aaa',
+                              fontSize: '0.75rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              marginLeft: '1.5rem'
+                            }}
+                          >
+                            {displayInfo.path}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}
