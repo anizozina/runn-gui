@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# Runn GUI Builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A desktop GUI application for building and managing [runn](https://github.com/k1LoW/runn) runbooks.
 
-Currently, two official plugins are available:
+Built with Tauri, React, TypeScript, and Vite.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- 🎨 **Visual Runbook Editor**: Create and edit runn runbooks through an intuitive GUI
+- 📝 **Multiple Step Types**: Support for HTTP, Include, Bind, DB, gRPC, SSH, and CDP steps
+- 🔄 **YAML Import/Export**: Seamlessly import existing YAML runbooks and export your work
+- ▶️ **Built-in Executor**: Run your runbooks directly from the GUI
+- 🌐 **Multi-language Support**: English and Japanese UI
+- 🎯 **Type-safe**: Built with TypeScript for reliability
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Development
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js (LTS version)
+- Rust (latest stable)
+- Platform-specific dependencies:
+  - **macOS**: Xcode Command Line Tools
+  - **Linux**: `libwebkit2gtk-4.1-dev`, `libappindicator3-dev`, `librsvg2-dev`, `patchelf`
+  - **Windows**: WebView2 (usually pre-installed)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Run in development mode
+npm run tauri dev
+
+# Build for production
+npm run tauri build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Release Process
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Automated Releases (Recommended)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Releases are automatically built for macOS (Intel & Apple Silicon), Windows, and Linux when you push a version tag:
+
+```bash
+# Create a new version tag
+git tag v0.1.0
+
+# Push the tag to GitHub
+git push origin v0.1.0
 ```
+
+This triggers a GitHub Actions workflow that:
+1. Builds the app for all platforms
+2. Creates installers (DMG for macOS, MSI for Windows, AppImage/deb for Linux)
+3. Creates a draft GitHub Release with all artifacts
+
+### Manual Testing Build
+
+To test the release build locally:
+
+```bash
+npm run tauri build
+```
+
+Built artifacts will be in `src-tauri/target/release/bundle/`.
+
+## Project Structure
+
+```
+runn-gui/
+├── src/                    # React frontend source
+│   ├── components/         # React components
+│   ├── store/             # Zustand state management
+│   ├── utils/             # Utility functions (YAML conversion)
+│   ├── i18n/              # Internationalization
+│   └── types/             # TypeScript type definitions
+├── src-tauri/             # Tauri backend
+│   ├── src/               # Rust source
+│   ├── icons/             # App icons
+│   └── Cargo.toml         # Rust dependencies
+└── .github/workflows/     # CI/CD workflows
+```
+
+## Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Backend**: Tauri 2, Rust
+- **State Management**: Zustand
+- **UI**: Custom CSS (dark theme)
+- **Drag & Drop**: dnd-kit
+- **YAML Processing**: js-yaml
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+[Add your license here]
