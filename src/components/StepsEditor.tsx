@@ -16,10 +16,11 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useRunbookStore } from '../store/runbookStore';
-import type { Step } from '../types/runbook';
+import type { Step, StepType } from '../types/runbook';
 import { HttpRequestEditor } from './HttpRequestEditor';
-import { IncludeStepViewer } from './IncludeStepViewer';
-import { BindStepViewer } from './BindStepViewer';
+import { StepTypeSelector } from './StepTypeSelector';
+import { IncludeStepEditor } from './IncludeStepEditor';
+import { BindStepEditor } from './BindStepEditor';
 import { useTranslation } from '../i18n/I18nContext';
 
 export function StepsEditor() {
@@ -27,19 +28,23 @@ export function StepsEditor() {
   const { t } = useTranslation();
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [stepTypeToCreate, setStepTypeToCreate] = useState<StepType | null>(null);
 
   const handleAddStep = () => {
     setShowAddForm(true);
     setSelectedStepId(null);
+    setStepTypeToCreate(null); // Reset step type when opening add form
   };
 
   const handleSaveNewStep = (stepData: Omit<Step, 'id'>) => {
     addStep(stepData);
     setShowAddForm(false);
+    setStepTypeToCreate(null); // Reset step type after save
   };
 
   const handleCancelAdd = () => {
     setShowAddForm(false);
+    setStepTypeToCreate(null); // Reset step type on cancel
   };
 
   const sensors = useSensors(
@@ -63,10 +68,10 @@ export function StepsEditor() {
   };
 
   interface StepDisplayInfo {
-    method?: string;
+    method?: string;      // For HTTP requests (GET, POST, etc.)
+    typeChip?: string;    // For non-HTTP steps (Include, Bind, etc.)
     path?: string;
     desc?: string;
-    icon?: string;
     label: string;
   }
 
@@ -75,7 +80,7 @@ export function StepsEditor() {
     if (step.include) {
       const includePath = typeof step.include === 'string' ? step.include : step.include.path;
       return {
-        icon: '📁',
+        typeChip: 'Include',
         label: step.desc || 'Include',
         path: includePath
       };
@@ -106,16 +111,17 @@ export function StepsEditor() {
 
     // Bind-only step
     if (step.bind && Object.keys(step.bind).length > 0) {
+      const bindKeys = Object.keys(step.bind).join(', ');
       return {
-        icon: '🔗',
+        typeChip: 'Bind',
         label: step.desc || 'Bind',
-        path: Object.keys(step.bind).join(', ')
+        path: bindKeys
       };
     }
 
     // Other types
-    if (step.db) return { label: step.desc || 'DB Query' };
-    if (step.grpcRequest) return { label: step.desc || 'gRPC', path: step.grpcRequest.method };
+    if (step.db) return { typeChip: 'DB', label: step.desc || 'DB Query' };
+    if (step.grpcRequest) return { typeChip: 'gRPC', label: step.desc || 'gRPC', path: step.grpcRequest.method };
 
     return { label: `Step ${index + 1}` };
   };
@@ -180,11 +186,6 @@ export function StepsEditor() {
               <span style={{ color: '#aaa', fontSize: '0.75rem', flexShrink: 0 }}>
                 {index + 1}.
               </span>
-              {displayInfo.icon && (
-                <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>
-                  {displayInfo.icon}
-                </span>
-              )}
               <span
                 style={{
                   color: '#fff',
@@ -198,7 +199,8 @@ export function StepsEditor() {
                 {displayInfo.label}
               </span>
             </div>
-            {displayInfo.path && (
+            {/* Second line: chip + path */}
+            {(displayInfo.method || displayInfo.typeChip || displayInfo.path) && (
               <div
                 style={{
                   display: 'flex',
@@ -207,6 +209,7 @@ export function StepsEditor() {
                   marginLeft: '2.5rem'
                 }}
               >
+                {/* HTTP Method Chip */}
                 {displayInfo.method && (
                   <span
                     className="method-chip"
@@ -219,6 +222,7 @@ export function StepsEditor() {
                                        displayInfo.method === 'POST' ? '#007bff' :
                                        displayInfo.method === 'PUT' ? '#ffc107' :
                                        displayInfo.method === 'DELETE' ? '#dc3545' :
+                                       displayInfo.method === 'PATCH' ? '#17a2b8' :
                                        '#6c757d',
                       color: '#fff',
                       flexShrink: 0
@@ -227,18 +231,42 @@ export function StepsEditor() {
                     {displayInfo.method}
                   </span>
                 )}
-                <span
-                  style={{
-                    color: '#aaa',
-                    fontSize: '0.75rem',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    minWidth: 0
-                  }}
-                >
-                  {displayInfo.path}
-                </span>
+                {/* Type Chip (Include, Bind, etc.) */}
+                {displayInfo.typeChip && (
+                  <span
+                    className="type-chip"
+                    style={{
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '3px',
+                      fontSize: '0.7rem',
+                      fontWeight: 'bold',
+                      backgroundColor: displayInfo.typeChip === 'Include' ? '#9b59b6' :
+                                       displayInfo.typeChip === 'Bind' ? '#e67e22' :
+                                       displayInfo.typeChip === 'DB' ? '#3498db' :
+                                       displayInfo.typeChip === 'gRPC' ? '#1abc9c' :
+                                       '#95a5a6',
+                      color: '#fff',
+                      flexShrink: 0
+                    }}
+                  >
+                    {displayInfo.typeChip}
+                  </span>
+                )}
+                {/* Path */}
+                {displayInfo.path && (
+                  <span
+                    style={{
+                      color: '#aaa',
+                      fontSize: '0.75rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      minWidth: 0
+                    }}
+                  >
+                    {displayInfo.path}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -346,7 +374,8 @@ export function StepsEditor() {
                             {displayInfo.label}
                           </span>
                         </div>
-                        {displayInfo.path && (
+                        {/* Second line: chip + path */}
+                        {(displayInfo.method || displayInfo.typeChip || displayInfo.path) && (
                           <div
                             style={{
                               display: 'flex',
@@ -355,6 +384,7 @@ export function StepsEditor() {
                               marginLeft: '1.5rem'
                             }}
                           >
+                            {/* HTTP Method Chip */}
                             {displayInfo.method && (
                               <span
                                 className="method-chip"
@@ -367,6 +397,7 @@ export function StepsEditor() {
                                                    displayInfo.method === 'POST' ? '#007bff' :
                                                    displayInfo.method === 'PUT' ? '#ffc107' :
                                                    displayInfo.method === 'DELETE' ? '#dc3545' :
+                                                   displayInfo.method === 'PATCH' ? '#17a2b8' :
                                                    '#6c757d',
                                   color: '#fff',
                                   flexShrink: 0
@@ -375,18 +406,42 @@ export function StepsEditor() {
                                 {displayInfo.method}
                               </span>
                             )}
-                            <span
-                              style={{
-                                color: '#aaa',
-                                fontSize: '0.75rem',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                minWidth: 0
-                              }}
-                            >
-                              {displayInfo.path}
-                            </span>
+                            {/* Type Chip (Include, Bind, etc.) */}
+                            {displayInfo.typeChip && (
+                              <span
+                                className="type-chip"
+                                style={{
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: '3px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 'bold',
+                                  backgroundColor: displayInfo.typeChip === 'Include' ? '#9b59b6' :
+                                                   displayInfo.typeChip === 'Bind' ? '#e67e22' :
+                                                   displayInfo.typeChip === 'DB' ? '#3498db' :
+                                                   displayInfo.typeChip === 'gRPC' ? '#1abc9c' :
+                                                   '#95a5a6',
+                                  color: '#fff',
+                                  flexShrink: 0
+                                }}
+                              >
+                                {displayInfo.typeChip}
+                              </span>
+                            )}
+                            {/* Path */}
+                            {displayInfo.path && (
+                              <span
+                                style={{
+                                  color: '#aaa',
+                                  fontSize: '0.75rem',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  minWidth: 0
+                                }}
+                              >
+                                {displayInfo.path}
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
@@ -403,25 +458,63 @@ export function StepsEditor() {
       <div style={{ flex: 1, overflow: 'auto' }}>
         {showAddForm ? (
           <div>
-            <h2>{t.steps.addNewStep}</h2>
-            <HttpRequestEditor
-              onSave={handleSaveNewStep}
-              onCancel={handleCancelAdd}
-            />
+            {stepTypeToCreate === null ? (
+              // Step 1: Show step type selector
+              <StepTypeSelector
+                onSelect={setStepTypeToCreate}
+                onCancel={handleCancelAdd}
+              />
+            ) : stepTypeToCreate === 'http' ? (
+              // HTTP Request Editor
+              <>
+                <h2>{t.steps.addNewStep}</h2>
+                <HttpRequestEditor
+                  onSave={handleSaveNewStep}
+                  onCancel={handleCancelAdd}
+                />
+              </>
+            ) : stepTypeToCreate === 'include' ? (
+              // Include Step Editor
+              <IncludeStepEditor
+                onSave={handleSaveNewStep}
+                onCancel={handleCancelAdd}
+              />
+            ) : stepTypeToCreate === 'bind' ? (
+              // Bind Step Editor
+              <BindStepEditor
+                onSave={handleSaveNewStep}
+                onCancel={handleCancelAdd}
+              />
+            ) : (
+              // Unsupported step type
+              <div>
+                <h2>{t.steps.addNewStep}</h2>
+                <div className="empty-state">
+                  <h3>Step type not yet supported</h3>
+                  <p>This step type will be available in a future update.</p>
+                  <button className="btn btn-secondary" onClick={handleCancelAdd}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : selectedStep ? (
           <div>
             {selectedStep.include ? (
-              <IncludeStepViewer
+              // Include Step Editor (not viewer)
+              <IncludeStepEditor
                 step={selectedStep}
-                onClose={() => setSelectedStepId(null)}
+                onCancel={() => setSelectedStepId(null)}
               />
             ) : !selectedStep.req && selectedStep.bind && Object.keys(selectedStep.bind).length > 0 ? (
-              <BindStepViewer
+              // Bind Step Editor (not viewer)
+              <BindStepEditor
                 step={selectedStep}
-                onClose={() => setSelectedStepId(null)}
+                onCancel={() => setSelectedStepId(null)}
               />
             ) : (
+              // HTTP Request Editor
               <>
                 <h2>{t.steps.editStep}</h2>
                 <HttpRequestEditor

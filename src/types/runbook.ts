@@ -150,3 +150,6 @@ export interface RunbookProject {
   runbooks: Runbook[];
   activeRunbookIndex: number;
 }
+
+// Step type for step type selector
+export type StepType = 'http' | 'include' | 'bind' | 'db' | 'grpc' | 'ssh' | 'cdp' | 'exec';

@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRunbookStore } from '../store/runbookStore';
 import { runbookToYAML, validateRunbook, yamlToRunbook } from '../utils/yaml';
 import { save, open } from '@tauri-apps/plugin-dialog';
-import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
+import { writeTextFile, readTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
+import { Command } from '@tauri-apps/plugin-shell';
+import { tempDir } from '@tauri-apps/api/path';
 import { useTranslation } from '../i18n/I18nContext';
 
 export function YAMLExporter() {
@@ -11,6 +13,9 @@ export function YAMLExporter() {
   const { t } = useTranslation();
   const [yamlContent, setYamlContent] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [runOutput, setRunOutput] = useState<string>('');
+  const [showOutput, setShowOutput] = useState(false);
 
   const generateYAML = () => {
     try {
@@ -98,16 +103,67 @@ export function YAMLExporter() {
     }
   };
 
+  const handleRun = async () => {
+    if (!yamlContent) {
+      alert('Please generate YAML first');
+      return;
+    }
+
+    try {
+      setIsRunning(true);
+      setRunOutput('');
+      setShowOutput(true);
+
+      // Save YAML to temporary file
+      const tempFileName = `temp-runbook-${Date.now()}.yml`;
+      await writeTextFile(tempFileName, yamlContent, { baseDir: BaseDirectory.Temp });
+
+      // Get full path to temp file
+      const tempDirPath = await tempDir();
+      const fullTempPath = `${tempDirPath}${tempFileName}`;
+
+      // Execute runn command
+      const command = Command.create('runn', ['run', fullTempPath]);
+
+      // Execute and capture output
+      const output = await command.execute();
+
+      // Display output
+      let outputText = '';
+      if (output.stdout) {
+        outputText += output.stdout;
+      }
+      if (output.stderr) {
+        outputText += '\n[STDERR]\n' + output.stderr;
+      }
+
+      setRunOutput(outputText);
+
+      if (output.code === 0) {
+        setRunOutput(prev => prev + '\n\n✅ Runbook executed successfully!');
+      } else {
+        setRunOutput(prev => prev + `\n\n❌ Runbook execution failed with code ${output.code}`);
+      }
+    } catch (error) {
+      setRunOutput(prev => prev + `\n\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   // Auto-generate on mount and when runbook changes
-  useState(() => {
+  useEffect(() => {
     generateYAML();
-  });
+  }, [runbook]); // Re-generate whenever runbook changes
 
   return (
     <div>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button className="btn btn-primary" onClick={generateYAML}>
           {t.yaml.generate}
+        </button>
+        <button className="btn btn-success" onClick={handleRun} disabled={!yamlContent || isRunning}>
+          {isRunning ? 'Running...' : '▶ Run'}
         </button>
         <button className="btn btn-success" onClick={handleExport} disabled={!yamlContent}>
           {t.yaml.exportToFile}
@@ -153,6 +209,33 @@ export function YAMLExporter() {
           placeholder={t.yaml.placeholder}
         />
       </div>
+
+      {showOutput && (
+        <div className="form-group" style={{ marginTop: '1rem' }}>
+          <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Execution Output:</span>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowOutput(false)}
+              style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+            >
+              Hide
+            </button>
+          </label>
+          <textarea
+            className="form-control"
+            value={runOutput}
+            readOnly
+            style={{
+              minHeight: '300px',
+              fontFamily: 'Courier New, monospace',
+              fontSize: '0.85rem',
+              backgroundColor: '#1a1a1a',
+              color: '#00ff00'
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
