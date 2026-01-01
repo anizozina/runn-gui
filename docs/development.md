@@ -143,7 +143,7 @@ export default defineConfig({
 {
   "productName": "runn-gui",
   "version": "0.1.0",
-  "identifier": "com.anizozina.runn-gui",
+  "identifier": "com.example.runn-gui",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173"
@@ -641,7 +641,7 @@ exec $SHELL
 ```json
 // Use custom identifier in tauri.conf.json
 {
-  "identifier": "com.yourcompany.runn-gui"
+  "identifier": "com.example.runn-gui"
 }
 ```
 
