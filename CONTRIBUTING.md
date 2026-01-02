@@ -29,7 +29,7 @@ Please be respectful and constructive in all interactions. We aim to maintain a 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/runn-gui.git
+git clone https://github.com/anizozina/runn-gui.git
 cd runn-gui
 
 # Install dependencies

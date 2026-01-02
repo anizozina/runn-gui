@@ -18,39 +18,7 @@ export interface HttpRunner {
   openApi3DocLocation?: string;
 }
 
-export interface GrpcRunner {
-  addr: string;
-  tls?: boolean;
-  skipVerify?: boolean;
-  cert?: string;
-  key?: string;
-  cacert?: string;
-  timeout?: string;
-  bufDirs?: string[];
-  protos?: string[];
-  importPaths?: string[];
-}
-
-export interface DbRunner {
-  dsn: string;
-  driver?: string;
-}
-
-export interface CdpRunner {
-  addr?: string;
-  timeout?: string;
-}
-
-export interface SshRunner {
-  host: string;
-  user?: string;
-  key?: string;
-  password?: string;
-  port?: number;
-  timeout?: string;
-}
-
-export type Runner = HttpRunner | GrpcRunner | DbRunner | CdpRunner | SshRunner;
+export type Runner = HttpRunner;
 
 export interface HttpRequest {
   method: HttpMethod;
@@ -59,39 +27,6 @@ export interface HttpRequest {
   body?: string | Record<string, any>;
   query?: Record<string, string | number | boolean>;
 }
-
-export interface GrpcRequest {
-  method: string;
-  message?: Record<string, any>;
-  metadata?: Record<string, string>;
-}
-
-export interface DbQuery {
-  query: string;
-  args?: any[];
-}
-
-export interface CdpAction {
-  actions: Array<{
-    navigate?: string;
-    click?: string;
-    screenshot?: string;
-    wait?: number;
-    [key: string]: any;
-  }>;
-}
-
-export interface SshCommand {
-  command: string;
-}
-
-export type StepRequest =
-  | { req: HttpRequest }
-  | { grpcRequest: GrpcRequest }
-  | { db: DbQuery }
-  | { cdp: CdpAction }
-  | { ssh: SshCommand }
-  | { exec: SshCommand };
 
 export interface TestCondition {
   condition: string;
@@ -112,11 +47,6 @@ export interface Step {
     until?: string;
   };
   req?: HttpRequest | Record<string, any>; // Can be standard format or runn format { "/path": { "method": {...} } }
-  grpcRequest?: GrpcRequest;
-  db?: DbQuery;
-  cdp?: CdpAction;
-  ssh?: SshCommand;
-  exec?: SshCommand;
   test?: TestCondition[] | string; // Can be array of conditions or single string condition
   include?: IncludeStep | string; // Can be object or string path
   bind?: {
@@ -144,11 +74,6 @@ export interface Runbook {
   };
   skipDbinit?: boolean;
   needs?: Record<string, any>;
-}
-
-export interface RunbookProject {
-  runbooks: Runbook[];
-  activeRunbookIndex: number;
 }
 
 // Step type for step type selector

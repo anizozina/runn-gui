@@ -119,10 +119,6 @@ export function StepsEditor() {
       };
     }
 
-    // Other types
-    if (step.db) return { typeChip: 'DB', label: step.desc || 'DB Query' };
-    if (step.grpcRequest) return { typeChip: 'gRPC', label: step.desc || 'gRPC', path: step.grpcRequest.method };
-
     return { label: `Step ${index + 1}` };
   };
 

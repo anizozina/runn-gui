@@ -51,12 +51,9 @@ App.tsx
 ├── VariablesEditor (manage variables)
 ├── StepsEditor (main step management)
 │   ├── StepTypeSelector (select step type)
-│   ├── HttpRequestEditor (create/edit HTTP steps)
-│   ├── IncludeStepEditor (create/edit Include steps)
-│   ├── BindStepEditor (create/edit Bind steps)
-│   ├── HttpRequestViewer (display HTTP step)
-│   ├── IncludeStepViewer (display Include step)
-│   └── BindStepViewer (display Bind step)
+│   ├── HttpRequestEditor (create/edit/display HTTP steps)
+│   ├── IncludeStepEditor (create/edit/display Include steps)
+│   └── BindStepEditor (create/edit/display Bind steps)
 └── YAMLExporter (generate/export YAML, execute runn)
 ```
 

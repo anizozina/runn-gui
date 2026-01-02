@@ -1,0 +1,16 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": ["index.html"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src-tauri/**",
+    "test-*.js",
+    "dist/**",
+    "node_modules/**"
+  ],
+  "vite": {
+    "entry": ["index.html", "src/main.tsx"]
+  },
+  "eslint": true,
+  "typescript": true
+}

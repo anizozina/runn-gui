@@ -128,9 +128,9 @@ export function validateRunbook(runbook: Runbook): { valid: boolean; errors: str
 
   // Validate each step has at least one action
   runbook.steps?.forEach((step, index) => {
-    const hasAction = step.req || step.grpcRequest || step.db || step.cdp || step.ssh || step.exec || step.include || step.bind;
+    const hasAction = step.req || step.include || step.bind;
     if (!hasAction) {
-      errors.push(`Step ${index + 1} must have at least one action (req, db, bind, include, etc.)`);
+      errors.push(`Step ${index + 1} must have at least one action (req, bind, include)`);
     }
   });
 
