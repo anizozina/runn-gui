@@ -594,25 +594,22 @@ Update version in:
 # Edit files, then:
 git add .
 git commit -m "chore: bump version to 0.2.0"
-git tag v0.2.0
 git push origin main
-git push origin v0.2.0
 ```
 
 ### GitHub Actions Release
 
-Pushing a version tag triggers automated release:
+Create a new release on GitHub to trigger automated builds:
 
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
+1. Go to GitHub **Releases** → **Draft a new release**
+2. Create a new tag (e.g., `v0.2.0`)
+3. Fill in release title and description
+4. Click **Publish release** (or **Save draft**)
 
-GitHub Actions will:
+GitHub Actions will automatically:
 1. Build for macOS (Intel & ARM), Windows, Linux
 2. Create installers
-3. Create draft GitHub Release
-4. Attach all artifacts
+3. Upload all artifacts to the release you created
 
 ## Troubleshooting
 

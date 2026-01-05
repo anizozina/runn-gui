@@ -235,20 +235,22 @@ runn-gui/
 
 ### Automated Releases (Recommended)
 
-Releases are automatically built for all platforms when you push a version tag:
+Releases are automatically built when you create a new release on GitHub:
 
 ```bash
-# Update version in package.json, src-tauri/Cargo.toml, and src-tauri/tauri.conf.json
-# Then create and push a tag:
-git tag v0.2.0
-git push origin v0.2.0
+# Update version in package.json, src-tauri/Cargo.toml, and src-tauri/tauri.conf.json first
 ```
 
-GitHub Actions will:
+Then on GitHub:
+1. Go to **Releases** → **Draft a new release**
+2. Create a new tag (e.g., `v0.2.0`) and fill in the release details
+3. Click **Publish release** (or **Save draft** for draft releases)
+
+GitHub Actions will automatically:
 1. Build the app for macOS (Intel & Apple Silicon), Windows, and Linux
 2. Create installers (`.dmg`, `.msi`, `.AppImage`, `.deb`)
-3. Create a draft GitHub Release with all artifacts
-4. You can review and publish the release
+3. Upload all artifacts to the release you just created
+4. You can then publish the release when ready
 
 ### Manual Build
 
