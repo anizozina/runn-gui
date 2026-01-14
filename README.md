@@ -8,6 +8,8 @@ Built with Tauri, React, TypeScript, and Vite.
 
 [Features](#features) • [Installation](#installation) • [Development](#development) • [Release](#release-process) • [Contributing](#contributing)
 
+[English](README.md) • [日本語](README-ja.md)
+
 </div>
 
 ---
@@ -35,7 +37,6 @@ Runn GUI Builder provides a visual interface for creating, editing, and executin
   - Path with variable interpolation
   - Headers management
   - Request body (JSON, form-data, raw text)
-  - Query parameters
   - Test assertions
   - Response binding
 
@@ -52,8 +53,8 @@ Runn GUI Builder provides a visual interface for creating, editing, and executin
 
 ### ▶️ Built-in Executor
 - Run runbooks directly from the GUI
-- Real-time output display
-- Success/failure status with colored output
+- Execution output display
+- Success/failure message
 - Terminal-style output panel
 
 ### 🌐 Multi-language Support
@@ -71,7 +72,7 @@ Runn GUI Builder provides a visual interface for creating, editing, and executin
 
 ### Download Pre-built Binaries
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/your-org/runn-gui/releases):
+Download the latest release for your platform from [GitHub Releases](https://github.com/anizozina/runn-gui/releases):
 
 - **macOS**: `.dmg` installer (Intel & Apple Silicon)
 - **Windows**: `.msi` installer
@@ -161,14 +162,14 @@ See [Development](#development) section below.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/runn-gui.git
+git clone https://github.com/anizozina/runn-gui.git
 cd runn-gui
 
 # Install dependencies
 npm install
 
 # Run in development mode
-npm run tauri dev
+npm run tauri:dev
 ```
 
 ### Development Scripts
@@ -181,13 +182,10 @@ npm run dev
 npm run build
 
 # Run Tauri app in development
-npm run tauri dev
+npm run tauri:dev
 
 # Build production binary
-npm run tauri build
-
-# Type checking
-npm run type-check
+npm run tauri:build
 
 # Linting
 npm run lint
@@ -257,7 +255,7 @@ GitHub Actions will automatically:
 To test the release build locally:
 
 ```bash
-npm run tauri build
+npm run tauri:build
 ```
 
 Built artifacts will be in `src-tauri/target/release/bundle/`:
@@ -270,7 +268,7 @@ Built artifacts will be in `src-tauri/target/release/bundle/`:
 - **Frontend**:
   - React 19 - UI framework
   - TypeScript - Type safety
-  - Vite - Build tool & dev server
+  - Vite (rolldown-vite) - Build tool & dev server
   - Zustand - State management
   - dnd-kit - Drag & drop
   - js-yaml - YAML processing
